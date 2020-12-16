@@ -109,10 +109,10 @@ func TestService_Statistics(t *testing.T) {
 	AssertNoError(t, err, "getting statistic")
 
 	if stat.ShortURL.Count != 1 {
-		t.Errorf("wa")
+		t.Errorf("want 1 'short', got %d", stat.ShortURL.Count)
 	}
 	if stat.LongURL.Count != reqNumber {
-		t.Errorf("want %d, got %d", reqNumber, stat.LongURL.Count)
+		t.Errorf("want %d 'long', got %d", reqNumber, stat.LongURL.Count)
 	}
 }
 
@@ -185,8 +185,11 @@ func (db *inMemoryDB) StatLongURL(ctx context.Context) (*Statistics, error) {
 }
 
 func stat(arr []time.Time) *Statistics {
+	var median *time.Time
 	count := len(arr)
-	median := arr[count/2]
+	if count > 0 {
+		median = &arr[count/2]
+	}
 	return &Statistics{
 		Count:  count,
 		Timing: median,

@@ -25,5 +25,5 @@ type OverallStatistics struct {
 
 type Statistics struct {
 	Count  int
-	Timing time.Time
+	Timing *time.Time
 }
