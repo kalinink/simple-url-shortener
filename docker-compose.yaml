@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  shortener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - DB_CONN_STR=postgres://user:password@sus-db:5432/urls?sslmode=disable
+    depends_on:
+      - sus-db
+
+  sus-db:
+    image: postgres:10.6
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password

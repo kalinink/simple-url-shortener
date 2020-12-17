@@ -31,7 +31,7 @@ func MakeMigrations(db *sqlx.DB) error {
 	if err != nil {
 		return err
 	}
-	migration, err := migrate.NewWithDatabaseInstance("file://internal/database/migrations", "hr_notifications", driver)
+	migration, err := migrate.NewWithDatabaseInstance("file://internal/database/migrations", "urls", driver)
 	if err != nil {
 		return err
 	}
