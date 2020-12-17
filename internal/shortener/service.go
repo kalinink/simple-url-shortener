@@ -13,7 +13,7 @@ import (
 
 const shortURLPathLength = 12
 
-type checkExpiredFunc func(lastAccess *time.Time, createdAt time.Time) bool
+type CheckExpiredFunc func(lastAccess *time.Time, createdAt time.Time) bool
 
 type Service struct {
 	urlRepository URLRepository
@@ -34,20 +34,24 @@ func NewService(repo URLRepository, hostName string, scheme string, expired time
 }
 
 func (srv *Service) CreateShortURL(ctx context.Context, longURL string) (*URL, error) {
-	_, err := url.Parse(longURL)
+	parsedURL, err := parseURL(longURL)
 	if err != nil {
-		return nil, NewBadParamsError("invalid url format", err)
+		return nil, err
+	}
+
+	if err := validateURL(parsedURL); err != nil {
+		return nil, err
 	}
 
 	shortURL := srv.makeShortURL(longURL)
 
-	err = srv.urlRepository.Save(ctx, &NewURL{
+	newURL := &NewURL{
 		Long:      longURL,
 		Short:     shortURLKey(shortURL),
 		CreatedAt: time.Now(),
-	})
+	}
 
-	if err != nil {
+	if err := srv.urlRepository.Save(ctx, newURL); err != nil {
 		return nil, err
 	}
 
@@ -62,8 +66,16 @@ func (srv *Service) CreateShortURL(ctx context.Context, longURL string) (*URL, e
 }
 
 func (srv *Service) GetLongURL(ctx context.Context, shortURL string) (*URL, error) {
-	parsedURL, err := srv.parseShortURL(shortURL)
+	parsedURL, err := parseURL(shortURL)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := validateURL(parsedURL); err != nil {
+		return nil, err
+	}
+
+	if err := srv.validateShortURL(parsedURL); err != nil {
 		return nil, err
 	}
 
@@ -129,17 +141,31 @@ func hashWithSalt(str, salt string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (srv *Service) parseShortURL(shortURL string) (*url.URL, error) {
+func (srv *Service) validateShortURL(shortURL *url.URL) error {
+	if shortURL.Host != srv.hostName || shortURL.Scheme != srv.scheme {
+		return NewBadParamsError("invalid scheme or host name", nil)
+	}
+
+	return nil
+}
+
+func parseURL(shortURL string) (*url.URL, error) {
 	parsedURL, err := url.Parse(shortURL)
 	if err != nil {
 		return nil, NewBadParamsError("invalid url format", err)
 	}
+	return parsedURL, nil
+}
 
-	if parsedURL.Host != srv.hostName || parsedURL.Scheme != srv.scheme {
-		return nil, NewBadParamsError("invalid scheme or host name", nil)
+func validateURL(u *url.URL) error {
+	if u.Scheme == "" {
+		return NewBadParamsError("scheme can't be blank", nil)
+	}
+	if u.Host == "" {
+		return NewBadParamsError("host can't be blank", nil)
 	}
 
-	return parsedURL, nil
+	return nil
 }
 
 func shortURLKey(url *url.URL) string {

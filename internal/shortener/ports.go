@@ -12,7 +12,7 @@ type URLShortenerService interface {
 
 type URLRepository interface {
 	Save(context.Context, *NewURL) error
-	GetIfNotExpired(context.Context, *ShortURL, checkExpiredFunc) (*URL, error)
+	GetIfNotExpired(context.Context, *ShortURL, CheckExpiredFunc) (*URL, error)
 	IncShort(context.Context) error
 	IncLong(context.Context) error
 	StatShortURL(context.Context) (*Statistics, error)

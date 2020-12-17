@@ -141,7 +141,7 @@ func (db *inMemoryDB) Save(ctx context.Context, url *NewURL) error {
 	return nil
 }
 
-func (db *inMemoryDB) GetIfNotExpired(ctx context.Context, s *ShortURL, isExpired checkExpiredFunc) (*URL, error) {
+func (db *inMemoryDB) GetIfNotExpired(ctx context.Context, s *ShortURL, isExpired CheckExpiredFunc) (*URL, error) {
 	u, exists := db.store[s.URL]
 	if !exists {
 		return nil, NewNotFoundError("url not found")
