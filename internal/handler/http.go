@@ -64,7 +64,7 @@ func (hdl *HTTPHandler) getLongURL(c echo.Context) error {
 		return hdl.handleShortenerServiceError(c, err)
 	}
 
-	return Respond(c, URLResponse{url.Short}, http.StatusOK)
+	return Respond(c, URLResponse{url.Long}, http.StatusOK)
 }
 
 func (hdl *HTTPHandler) getStatistics(c echo.Context) error {
