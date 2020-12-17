@@ -1,0 +1,6 @@
+linter:
+	go vet ./...
+	golangci-lint run -E gofmt -E golint -E vet --timeout 2m
+
+test:
+	go test -v --race ./...
