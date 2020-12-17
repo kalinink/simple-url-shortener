@@ -137,7 +137,7 @@ func (srv *Service) makeShortURL(longURL string) *url.URL {
 
 func hashWithSalt(str, salt string) string {
 	h := md5.New()
-	h.Write([]byte(str + salt))
+	_, _ = h.Write([]byte(str + salt))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
