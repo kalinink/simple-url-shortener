@@ -52,7 +52,7 @@ func toServiceError(err error) error {
 	switch pgErr.Type {
 	case NotFound:
 		errType = shortener.NotFoundErrType
-		text = "no found"
+		text = "not found"
 	case UniqueViolation, ForeignKeyViolation:
 		errType = shortener.BadParamsErrType
 	}

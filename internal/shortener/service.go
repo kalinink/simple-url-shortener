@@ -110,12 +110,26 @@ func (srv *Service) GetLongURL(ctx context.Context, shortURL string) (*URL, erro
 func (srv *Service) Statistics(ctx context.Context) (*OverallStatistics, error) {
 	shortURLStat, err := srv.urlRepository.StatShortURL(ctx)
 	if err != nil {
-		return nil, err
+		sErr, ok := err.(Error)
+		if !ok {
+			return nil, NewInternalError("", err)
+		}
+		if sErr.Type != NotFoundErrType {
+			return nil, err
+		}
+		shortURLStat = &Statistics{}
 	}
 
 	longURLStat, err := srv.urlRepository.StatLongURL(ctx)
 	if err != nil {
-		return nil, err
+		sErr, ok := err.(Error)
+		if !ok {
+			return nil, NewInternalError("", err)
+		}
+		if sErr.Type != NotFoundErrType {
+			return nil, err
+		}
+		longURLStat = &Statistics{}
 	}
 
 	return &OverallStatistics{
