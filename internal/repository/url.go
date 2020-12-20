@@ -148,7 +148,7 @@ func (repo *URL) stat(ctx context.Context, table string) (*Statistics, error) {
 		           ROW_NUMBER() OVER (ORDER BY access_at) as rank
 		            FROM %s
 		    ) as ranks
-		WHERE rank = count/2;
+		WHERE rank = ceil(count/2::float);
 	`, table, table)
 
 	s := Statistics{}
