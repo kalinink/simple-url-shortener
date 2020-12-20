@@ -4,3 +4,9 @@ linter:
 
 test:
 	go test -v --race ./...
+
+doc-gen:
+	swag init --generalInfo=./cmd/main.go --parseInternal
+
+run:
+	docker-compose up

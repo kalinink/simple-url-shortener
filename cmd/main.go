@@ -38,6 +38,8 @@ type config struct {
 	URLLifeTime time.Duration `envconfig:"URL_LIFE_TIME" default:"24h"`
 }
 
+// @title simple-url-shortener API
+// @version 0.1
 func main() {
 	log := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	log.Info().Msgf("Version: %s", serviceVersion)

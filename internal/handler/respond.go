@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const layout = "2006-01-02 15:04:05"
+
 func RespondError(c echo.Context, err error, status int) error {
 	if echoErr, ok := err.(*echo.HTTPError); ok {
 		err = echoErr.Internal
@@ -28,10 +30,10 @@ func respond(c echo.Context, data interface{}, status int) error {
 
 type ErrorResponse struct {
 	Error string `json:"error"`
-}
+} // @name Error
 
 func RespondInternalError(c echo.Context) error {
-	return respond(c, nil, http.StatusInternalServerError)
+	return respond(c, ErrorResponse{"internal server error"}, http.StatusInternalServerError)
 }
 
 func (hdl *HTTPHandler) handleShortenerServiceError(c echo.Context, err error) error {
@@ -52,26 +54,26 @@ var serviceErrorToHTTPError = map[int]int{
 
 type URLResponse struct {
 	URL string `json:"url"`
-}
+} // @name Response
 
 type URLRequest struct {
 	URL string `json:"url"`
-}
+} // @name Request
 
 type StatisticResponse struct {
 	Counts  CountStatistics  `json:"counts"`
 	Timings TimingStatistics `json:"timings"`
-}
+} // @name Statistics
 
 type CountStatistics struct {
-	Long  int `json:"long"`
-	Short int `json:"short"`
-}
+	Long  int `json:"long" example:"10"`
+	Short int `json:"short" example:"5"`
+} // @name CountStatistics
 
 type TimingStatistics struct {
-	Long  *time.Time `json:"long"`
-	Short *time.Time `json:"short"`
-}
+	Long  string `json:"long" example:"2020-11-10 12:00:05"`
+	Short string `json:"short" example:"2020-10-23 01:33:45"`
+} // @name TimingStatistics
 
 func serviceStatToResponseDTO(s *shortener.OverallStatistics) *StatisticResponse {
 	return &StatisticResponse{
@@ -80,8 +82,15 @@ func serviceStatToResponseDTO(s *shortener.OverallStatistics) *StatisticResponse
 			Short: s.ShortURL.Count,
 		},
 		Timings: TimingStatistics{
-			Long:  s.LongURL.Timing,
-			Short: s.ShortURL.Timing,
+			Long:  formatTime(s.LongURL.Timing, layout),
+			Short: formatTime(s.ShortURL.Timing, layout),
 		},
 	}
+}
+
+func formatTime(t *time.Time, layout string) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format(layout)
 }
