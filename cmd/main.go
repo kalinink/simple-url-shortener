@@ -20,11 +20,12 @@ import (
 var serviceVersion = "dev"
 
 type config struct {
-	DBConnStr         string        `envconfig:"DB_CONN_STR" required:"true"`
-	DBMaxConnections  int           `envconfig:"DB_MAX_CONNECTIONS" default:"20"`
-	DBMaxIdleConns    int           `envconfig:"DB_MAX_IDLE_CONNECTIONS" default:"0"`
-	DBConnMaxLifetime time.Duration `envconfig:"DB_CONN_MAX_LIFETIME" default:"5m"`
-	DBReadTimeout     time.Duration `envconfig:"DB_READ_TIMEOUT_SEC" default:"1m"`
+	DBConnStr             string        `envconfig:"DB_CONN_STR" required:"true"`
+	DBMaxConnections      int           `envconfig:"DB_MAX_CONNECTIONS" default:"20"`
+	DBMaxIdleConns        int           `envconfig:"DB_MAX_IDLE_CONNECTIONS" default:"0"`
+	DBConnMaxLifetime     time.Duration `envconfig:"DB_CONN_MAX_LIFETIME" default:"5m"`
+	DBReadTimeout         time.Duration `envconfig:"DB_READ_TIMEOUT_SEC" default:"1m"`
+	DBNumberInitConnRetry int           `envconfig:"DB_NUMBER_CONNECTIONS_RETRY" default:"6"`
 
 	ServerPort             string        `envconfig:"SERVER_PORT" default:"8080"`
 	ServerHost             string        `envconfig:"SERVER_HOST" default:"0.0.0.0"`
@@ -53,9 +54,10 @@ func run(log *zerolog.Logger) error {
 	}
 
 	dbConn, err := database.Connect(cfg.DBConnStr, database.Config{
-		MaxOpenConns:    cfg.DBMaxConnections,
-		ConnMaxLifetime: cfg.DBConnMaxLifetime,
-		MaxIdleConns:    cfg.DBMaxIdleConns,
+		MaxOpenConns:           cfg.DBMaxConnections,
+		ConnMaxLifetime:        cfg.DBConnMaxLifetime,
+		MaxIdleConns:           cfg.DBMaxIdleConns,
+		NumberInitConnectRetry: cfg.DBNumberInitConnRetry,
 	})
 
 	if err != nil {

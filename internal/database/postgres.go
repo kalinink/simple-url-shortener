@@ -10,16 +10,33 @@ import (
 )
 
 type Config struct {
-	MaxOpenConns    int
-	ConnMaxLifetime time.Duration
-	MaxIdleConns    int
+	MaxOpenConns           int
+	ConnMaxLifetime        time.Duration
+	MaxIdleConns           int
+	NumberInitConnectRetry int
 }
 
 func Connect(connString string, cfg Config) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("postgres", connString)
-	if err != nil {
-		return nil, err
+	var (
+		err   error
+		db    *sqlx.DB
+		retry int
+	)
+
+	for {
+		db, err = sqlx.Connect("postgres", connString)
+		if err != nil {
+			if retry >= cfg.NumberInitConnectRetry {
+				return nil, err
+			}
+			retry++
+			time.Sleep(time.Duration(retry) * time.Second)
+			continue
+		}
+
+		break
 	}
+
 	db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
